@@ -35,3 +35,5 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+##########password
+db_connect.py
