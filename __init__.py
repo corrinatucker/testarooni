@@ -56,6 +56,18 @@ def main():
 def dashboard():
     return render_template("dashboard.html", APP_CONTENT = APP_CONTENT)
 
+@app.route('/map/', methods=["GET","POST"])
+@login_required
+def mapapp():
+    try:
+        output = ['Vans are fun', 'Python, Java, php, \
+        C++', '<p><strong>Hey Van Lovers</strong></p>', 42, '42']
+       
+    return render_template("map.html", output = output)
+
+    except Exception as e:
+        return(str(e))
+
 @app.route('/login/', methods=["GET","POST"])
 def login_page():
     error = ''
@@ -138,6 +150,28 @@ def logout():
     session.clear()
     gc.collect()
     return redirect(url_for('main'))
+
+@app.route('/sitemap.xml/', methods=['GET'])
+def sitemap():
+    try:
+        pages = []
+        week = (datetime.now() - timedelta(days = 7)).date().isoformat()
+        for rule in app.url_map.iter_rules():
+            if "GET" in rule.methods and len(rule.arguments)==0:
+                pages.append(
+                    ["https://mapmyvan.com"+str(rule.rule),week]
+                )
+        sitemap_xml = render_template('sitemap_template.xml', pages = pages)
+        response = make_response(sitemap_xml)
+        response.headers["Content-Type"] = "application/xml"
+        return response
+    except Exception as e:
+        return(str(e)) #remove for production
+
+@app.route('/robots.txt/')
+def robots():
+    #return("User-agent: *\nDisallow /") #Disallows all robot traffic
+    return("User-agent: *\nDisallow: /register/\nDisallow: /login/") #Disallows robot traffic to sensitive urls
 
 
 @app.errorhandler(404)

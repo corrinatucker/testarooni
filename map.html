@@ -3,13 +3,69 @@
 {% block body %}
 
 
-<body>
+
     <div class="container">
     
-        <h4>Your Van's Desinations </h4>
-        <br>
+        <h1>Your Van's Desinations </h1>
+        <h2>for loop with Jinja</h2>
+        
+       {% for o in output %}
+        
+        {{o}} 
+        
+        {% endfor %}
+        
+        <hr>
+        
+        <h2>if statement with Jinja</h2>
+        
+        <!-- |string will similarly convert to strings -->
+        
+        {% if output[3] > 10 %}
+            <p>42 is greater than 10.</p>
+        {% endif %}
+        <hr>
+        
+        <h2>replace() with Jinja</h2>
+        <p>{{ output[0]|replace('fun', 'sick nasty') }}</p>
+        
+        <hr>
+        
+        <h2>loop through a string with .split( ) and make it a list</h2>
        
+        <ul>
+        {% for lang in output[1].split(',') %}
+           <li> {{lang}} </li>
+        
+        {% endfor %}
+        </ul>  
+        <h2>Render HTML in Jinja</h2>
+        {{output[2]|safe}}
+        
+        <hr>
+     
+        <h2>Render code in HTML</h2>
+        {% raw %}
+        <pre>
+        <code>
+            {% for i in items %}
+                    {{i}}
+            {% endfor %}
+            </code>
+            </pre>
+        {% endraw %}
+        
+        <hr>
+        
+        <h2> Jinja Macros</h2>
+        {% macro input(name, value='', type='text', size=20) -%}
+        <input type="{{ type }}" name="{{ name }}" value="{{
+        value|e }}" size="{{ size }}">
+        {%- endmacro %}
+        
+        <p>{{ input('username') }}</p>
+        <p>{{ input('password', type='password') }}</p>
     </div>
-</body>
+
 
 {% endblock %}
