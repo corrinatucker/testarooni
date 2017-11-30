@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css?family=Francois+One');
+
+
+.nav-item{
+    display: inline-block;
+    margin-top: 10px;    
+}
+
+h1 {
+    font-family: 'Francois One', sans-serif;
+}
+
+
+body {
+    background-color: darkseagreen
+}
+
+.buttons {
+    padding: 2%;
+    width: 20%;
+    height: 50%;
+    position:sticky; 
+}
+
+.mainpage {
+    padding: 2%
+}

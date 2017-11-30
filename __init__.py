@@ -1,15 +1,29 @@
-from flask import Flask, render_template, flash, url_for, redirect, request, session
+from flask import Flask, render_template, flash, url_for, redirect, request, session, make_response, send_file, send_from_directory, jsonify
 from wtforms import Form, BooleanField, TextField, PasswordField, validators
+from datetime import datetime, timedelta
 from passlib.hash import sha256_crypt
 from MySQLdb import escape_string as thwart
 import gc
+import os
+from werkzeug.utils import secure_filename
 from functools import wraps
 from content_management import Content
 from db_connect import connection
+from geopy.geocoders import Nominatim
+from geopy.distance import vincenty
+from geo import geolocation
+
+
 
 APP_CONTENT = Content()
 
-app = Flask(__name__)
+UPLOAD_FOLDER = '/var/www/FlaskApp/FlaskApp/uploads'
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+
+
+
+app = Flask(__name__, instance_path='/var/www/FlaskApp/FlaskApp/protected')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def login_required(f):
     @wraps(f)
@@ -21,6 +35,9 @@ def login_required(f):
             return redirect(url_for('login_page'))
 
     return wrap
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route("/", methods = ["GET", "POST"])
 def main():
@@ -50,11 +67,64 @@ def main():
         flash(e)
         error = "Invalid credentials, try again."
         return render_template("main.html", error = error)
+    
+    
+@app.route("/uploads/", methods = ["GET", "POST"])
+@login_required
+def upload_file():
+    try:
+        if request.method == 'POST':
+            if 'file' not in request.files:
+                flash('No file part')
+                return redirect(request.url)
+            file = request.file['file']
+            if file.filename == '':
+                flash('No selected file')
+                return redirect(request.url)
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                flash('File upload successful')
+                return render_template('uploads.html', filename = filename)
+            return render_template('uploads.html')
+    except:
+        flash("Please upload a valid file.")
+        return render_template('uploads.html')
+
+@app.route('/download')
+@login_required
+def download():
+    try:
+        return send_file('/var/www/FlaskApp/FlaskApp/uploads/screencap.png', attachment_filename='screencap.png')
+    except Exception as e:
+        return str(e)
+    
+@app.route('/downloader/', methods=['GET', 'POST'])
+@login_required
+def downloader():
+    error = ''
+    try:
+        if request.method == "POST":
+            filename = request.form['filename']
+            return send_file('/var/www/FlaskApp/FlaskApp/uploads/' + filename, attachment_filename='download')
+        else:
+            return render_template('downloader.html', error = error)
+        error = "Please enter a valid file name"
+        return render_template('downloader.html', error = error)
+    except:
+        error = "Please enter a valid file name"
+        return render_template('downloader.html', error = error)
+
 
 @app.route("/dashboard/", methods = ["GET", "POST"])
 @login_required
 def dashboard():
     return render_template("dashboard.html", APP_CONTENT = APP_CONTENT)
+
+@app.route("/about/", methods = ["GET", "POST"])
+def about():
+    return render_template("about.html", APP_CONTENT = APP_CONTENT)
+
 
 @app.route('/map/', methods=["GET","POST"])
 @login_required
@@ -63,10 +133,26 @@ def mapapp():
         output = ['Vans are fun', 'Python, Java, php, \
         C++', '<p><strong>Hey Van Lovers</strong></p>', 42, '42']
        
-    return render_template("map.html", output = output)
+        return render_template("map.html", output = output)
 
     except Exception as e:
         return(str(e))
+    
+
+@app.route('/location/', methods=["GET","POST"])
+def location():
+    location = ''
+    try:
+        if request.method == 'POST':
+
+            location_request = request.form['location_name']
+            location = geolocation(location_request)
+
+            return render_template("location.html", location = location)
+        return render_template("location.html", location = location)     
+
+    except Exception as e:
+        return str(e)
 
 @app.route('/login/', methods=["GET","POST"])
 def login_page():
@@ -123,7 +209,7 @@ def register_page():
 
             if int(x) > 0:
                 flash("That username is already taken, please choose another")
-                return render_template('/register/', form=form)
+                return render_template('register.html', form=form)
 
             else:
                 c.execute("INSERT INTO users (username, password, email, tracking) VALUES ('{0}','{1}','{2}','{3}')".format(thwart(username), thwart(password), thwart(email), thwart("/dashboard/")))
