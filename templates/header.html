@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>DIGIT 400</title>
+<title>Map My Van</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Local Bootstrap CSS -->
 <link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" rel="stylesheet">
@@ -11,7 +11,7 @@
 <link href="{{ url_for('static',filename='css/styleagain.css') }}" rel="stylesheet">
 
 <!-- Favicon link -->
-<link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+<link rel="shortcut icon" href="{{ url_for('static', filename='images/vwvanlogo.png') }}">
 
 <script>
 // Modal Initializer
@@ -23,7 +23,7 @@ $('#myInput').focus()
 
 <header>
 <!-- Nav -->
-<ul class="nav justify-content-end">
+<ul class="nav justify-content-center">
     <li class="nav-item">
 <a class="nav-link active" href="/"><img style="max-width:120px; margin-top: -17px;" src="{{ url_for('static', filename='images/vwvanlogo.png') }}">
 </a>

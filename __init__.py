@@ -67,8 +67,8 @@ def main():
         flash(e)
         error = "Invalid credentials, try again."
         return render_template("main.html", error = error)
-    
-    
+
+
 @app.route("/uploads/", methods = ["GET", "POST"])
 @login_required
 def upload_file():
@@ -98,7 +98,7 @@ def download():
         return send_file('/var/www/FlaskApp/FlaskApp/uploads/screencap.png', attachment_filename='screencap.png')
     except Exception as e:
         return str(e)
-    
+
 @app.route('/downloader/', methods=['GET', 'POST'])
 @login_required
 def downloader():
@@ -132,27 +132,49 @@ def mapapp():
     try:
         output = ['Vans are fun', 'Python, Java, php, \
         C++', '<p><strong>Hey Van Lovers</strong></p>', 42, '42']
-       
+
         return render_template("map.html", output = output)
 
     except Exception as e:
         return(str(e))
-    
+
+
+
 
 @app.route('/location/', methods=["GET","POST"])
 def location():
     location = ''
+    openmap = ''
     try:
         if request.method == 'POST':
 
             location_request = request.form['location_name']
             location = geolocation(location_request)
+            openmap = 'https://www.google.com/maps/embed/v1/place?key=AIzaSyA8GYhSZnS3wki-wqm8t9uK0u8gEGQ63Zg&q='+str(location)
 
-            return render_template("location.html", location = location)
-        return render_template("location.html", location = location)     
+            return render_template("location.html", location = location, openmap = openmap)
+        return render_template("location.html", location = location, openmap = openmap)
 
     except Exception as e:
         return str(e)
+
+@app.route('/coordinates/', methods=["GET", "POST"])
+def coordinates():
+    coordinates = ''
+    googlemap = ''
+    try:
+        if request.method == "POST":
+
+            coordinates_request = request.form['location_coordinates']
+            coordinates = geolocation(coordinates_request)
+            googlemap = 'https://www.google.com/maps/embed/v1/place?key=AIzaSyA8GYhSZnS3wki-wqm8t9uK0u8gEGQ63Zg&q='+str(coordinates)
+            
+            return render_template("coordinates.html", coordinates = coordinates, googlemap = googlemap)
+        return render_template("coordinates.html", coordinates = coordinates, googlemap = googlemap)
+
+    except Exception as e:
+        return str(e)
+
 
 @app.route('/login/', methods=["GET","POST"])
 def login_page():
